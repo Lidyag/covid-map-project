@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>COVID-19 Map</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    #title {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 24px;
+  font-family: Arial, sans-serif;
+  color: white;
+  z-index: 1;
+}
+
+#subtitle {
+  position: absolute;
+  top: 55px;
+  left: 20px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  color: white;
+  z-index: 1;
+}
+#legend {
+  position: absolute;
+  bottom: 30px;
+  right: 20px;
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  z-index: 1;
+}
+
+.legend-title {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+}
+
+  </style>
+    
+
+</head>
+
+<body>
+<div id="title">COVID-19 Case Rates by County</div>
+<div id="subtitle">>COVID-19 County-Level Rates (2020)</div>
+
+  <div id="map"></div>
+  <div id="legend">
+  <div class="legend-title">Cases per 100k in County</div>
+
+  <div class="legend-item">
+    <div class="legend-color" style="background:#fff5f0;"></div>
+    <span>0–10K</span>
+  </div>
+
+  <div class="legend-item">
+    <div class="legend-color" style="background:#fcbba1;"></div>
+    <span>10K–25K</span>
+  </div>
+
+  <div class="legend-item">
+    <div class="legend-color" style="background:#fc9272;"></div>
+    <span>25K–50K</span>
+  </div>
+
+  <div class="legend-item">
+    <div class="legend-color" style="background:#fb6a4a;"></div>
+    <span>50K–100K</span>
+  </div>
+
+  <div class="legend-item">
+    <div class="legend-color" style="background:#cb181d;"></div>
+    <span>100K+</span>
+  </div>
+</div>
+
+  
+
+
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoibGlkeWFnIiwiYSI6ImNta3owcmc4ZjBjdWkzaG9kcHUxNDV4OWYifQ.nt80k6jNOcPMQgRw1Lk8Eg';
+
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/dark-v10',
+      center: [-98, 38],
+      zoom: 3,
+      projection: 'albers'
+    });
+    map.on('load', () => {
+    map.addSource('covidRates', {
+      type: 'geojson',
+      data: 'assets/us-covid-2020-rates.json'
+    });
+
+
+
+    map.addLayer({
+      id: 'covid-rates-layer',
+      type: 'fill',
+      source: 'covidRates',
+      paint: {
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'rates'],
+          0, '#fff5f0',
+          10, '#fcbba1',
+          25, '#fc9272',
+          50, '#fb6a4a',
+          100, '#cb181d'
+      
+        ],
+        'fill-opacity': 0.75,
+        'fill-outline-color': '#ffffff'
+      }
+    });
+  });
+  map.on('click', 'covid-rates-layer', (e) => {
+  const props = e.features[0].properties;
+
+  new mapboxgl.Popup()
+    .setLngLat(e.lngLat)
+    .setHTML(
+      `<strong>County:</strong> ${props.county}<br>
+       <strong>State:</strong> ${props.state}<br>
+       <strong>COVID Rate:</strong> ${props.rates}`
+    )
+    .addTo(map);
+   });
+  </script>
+
+</body>
+</html>
