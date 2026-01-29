@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>COVID-19 Cases (Proportional Symbols)</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    #title {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 26px;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  color: white;
+  z-index: 1;
+}
+
+#subtitle {
+  position: absolute;
+  top: 55px;
+  left: 20px;
+  font-size: 14px;
+  font-family: 'Arial', sans-serif;
+  color: #dddddd;
+  z-index: 1;
+}
+#legend {
+  position: absolute;
+  bottom: 30px;
+  right: 20px;
+  background: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  z-index: 1;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.legend-circle {
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+
+
+
+  </style>
+  
+</head>
+
+<body>
+<div id="title">COVID-19 Cases by County</div>
+<div id="subtitle">United States · 2020</div>
+
+
+  <div id="map"></div>
+  <div id="legend"></div>
+
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoibGlkeWFnIiwiYSI6ImNta3owcmc4ZjBjdWkzaG9kcHUxNDV4OWYifQ.nt80k6jNOcPMQgRw1Lk8Eg';
+
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/dark-v10',
+      center: [-98, 38],
+      zoom: 3,
+      projection: 'albers'
+    });
+    map.on('load', () => {
+
+      map.addSource('covidCounts', {
+        type: 'geojson',
+        data: 'assets/us-covid-2020-counts.json'
+     });
+
+     map.addLayer({
+       id: 'covid-counts-layer',
+       type: 'circle',
+       source: 'covidCounts',
+       paint: {
+      'circle-radius': [
+        'interpolate',
+        ['linear'],
+        ['get', 'cases'],
+        0, 2,
+        5000, 6,
+        20000, 12,
+        50000, 20,
+        100000, 30,
+        300000, 45
+      ],
+      'circle-color': [
+        'interpolate',
+        ['linear'],
+        ['get', 'cases'],
+        0, '#c7b9ff',
+        20000, '#8b5cf6',
+        100000, '#4c1d95',
+        300000, '#000000'
+      ],
+      'circle-opacity': 0.6,
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 0.5
+    }
+  });
+
+  map.on('click', 'covid-counts-layer', (e) => {
+    const props = e.features[0].properties;
+
+    new mapboxgl.Popup()
+      .setLngLat(e.lngLat)
+      .setHTML(`
+        <strong>County:</strong> ${props.county}<br>
+        <strong>State:</strong> ${props.state}<br>
+        <strong>Cases:</strong> ${Number(props.cases).toLocaleString()}
+      `)
+      .addTo(map);
+  });
+     map.on('mouseenter', 'covid-counts-layer', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.on('mouseleave', 'covid-counts-layer', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      
+      const legend = document.getElementById('legend');
+
+      legend.innerHTML = `
+        <strong>Cases</strong><br>
+        <div class="legend-item">
+          <div class="legend-circle" style="width:10px;height:10px;background:#c7b9ff;"></div>
+          <span>&lt; 20,000</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-circle" style="width:16px;height:16px;background:#8b5cf6;"></div>
+          <span>20,000 – 100,000</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-circle" style="width:22px;height:22px;background:#4c1d95;"></div>
+          <span>100,000 – 300,000</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-circle" style="width:28px;height:28px;background:#000000;"></div>
+          <span>&gt; 300,000</span>
+        </div>
+        <div style="margin-top:6px;font-size:10px;">
+          Source: New York Times
+        </div>
+      `;
+    });
+
+   </script>
+
+</body>
+</html>
