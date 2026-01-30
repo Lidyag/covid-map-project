@@ -6,6 +6,7 @@
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css" rel="stylesheet">
+   
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js"></script>
 
   <style>
@@ -63,7 +64,15 @@
   border-radius: 50%;
   margin-right: 8px;
 }
-
+#credit {
+  position: absolute;
+  bottom: 10px;
+  left: 20px;
+  font-size: 10px;
+  color: #aaaaaa;
+  font-family: Arial, sans-serif;
+  z-index: 1;
+}
 
 
 
@@ -74,7 +83,12 @@
 <body>
 <div id="title">COVID-19 Cases by County</div>
 <div id="subtitle">United States · 2020</div>
-
+<div id="description">
+  Proportional symbol map showing total confirmed COVID-19 cases by U.S. county in 2020.
+</div>
+<div id="credit">
+  Data: New York Times & ACS | Map by Lidya · GEOG 458
+</div>
 
   <div id="map"></div>
   <div id="legend"></div>
